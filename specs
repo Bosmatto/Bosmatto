@@ -1,0 +1,83 @@
+# SPEC - Sistema de Controle de Ponto Eletrônico (PWA Tablet/Desktop)
+
+## 1. Visão Geral do Projeto
+Este documento estabelece as especificações técnicas e funcionais para o desenvolvimento de um **Sistema PWA de Controle de Ponto Eletrônico**, projetado exclusivamente para execução em **Tablets e Desktops** (orientação paisagem/retrato em dispositivos com largura >= 768px). 
+
+O sistema deve ser resiliente a falhas de conectividade (offline-first via Service Workers), seguro contra fraudes de marcação e preparado para execução autônoma orientada por agentes de IA.
+
+---
+
+## 2. Stack Tecnológica e Arquitetura
+
+### 2.1 Agente de Execução & Repositório
+* **Agente de IA Autônomo:** Google Jules.
+* **Hospedagem & Repositório:** GitHub (utilização de versionamento e GitHub Pages/Actions se aplicável).
+
+### 2.2 Backend & Banco de Dados
+* **Plataforma Database:** Supabase (PostgreSQL).
+* **Comunicação:** Conexão direta via API REST do Supabase utilizando o SDK JavaScript.
+
+### 2.3 Frontend & Dependências
+* **Core:** HTML5, CSS3, JavaScript Vanilla (ES6+), sem frameworks pesados (React, Vue, Angular).
+* **Bibliotecas Autorizadas (via CDN) para Redução de Código e Erros:**
+  * `@supabase/supabase-js` (CDN via unpkg/jsDelivr) para operações de banco de dados e autenticação via API REST.
+  * `lucide` / `lucide-icons` (CDN via unpkg/jsDelivr) para biblioteca de ícones vetoriais. **É proibido o uso de emojis na interface do usuário (UI).**
+* **APIs Nativas do Navegador:**
+  * `ServiceWorker` + `Cache API` + `IndexedDB` para resiliência offline (PWA).
+  * `navigator.mediaDevices.getUserMedia` para captura de foto/reconhecimento biométrico no momento do registro.
+
+---
+
+## 3. Diretrizes de UI / UX
+
+* **Dispositivos Alvo:** Exclusivo para Tablets e Desktops (min-width: 768px).
+* **Estática Visual:** Design limpo (Clean UI), fundo predominantemente branco (`#ffffff` / `#f8f9fa`), contraste alto para leitura rápida e tipografia moderna sem serifa.
+* **Componentes de Status:**
+  * Indicador fixo visual de status da rede: **Online** (ícone verde) / **Offline** (ícone amarelo/laranja).
+  * Indicador fixo de status da impressora: **Operacional** (verde) / **Sem Papel/Defeito** (vermelho).
+* **Ícones:** Uso exclusivo de ícones vetoriais da biblioteca Lucide.
+
+---
+
+## 4. Requisitos Funcionais (RF)
+
+| ID | Título | Descrição |
+| :--- | :--- | :--- |
+| **RF-01** | **Registro de Ponto** | Registrar marcações nos 4 eventos: Entrada, Saída para Intervalo, Retorno do Intervalo e Saída do Expediente. |
+| **RF-02** | **Emissão de Comprovante** | Imprimir ticket físico contendo: Razão Social, CNPJ, Endereço, Nome, PIS, Cargo, Turno e Horário Exato registrado. |
+| **RF-03** | **Registro de Justificativa** | Solicitar e armazenar justificativa obrigatória do colaborador caso a marcação exceda a tolerância. |
+| **RF-04** | **Notificação de Inconsistência** | Gerar alerta automático no painel/banco para o gestor em casos de atrasos, saídas antecipadas ou ausências. |
+| **RF-05** | **Autenticação Biométrica** | Validar a identidade do funcionário por biometria digital e/ou captura de foto via câmera nativa (`getUserMedia`). |
+| **RF-06** | **Autenticação de Exceção** | Permitir autenticação alternativa via Cartão de Proximidade (RFID) ou PIN em casos especiais aprovados. |
+| **RF-07** | **Gestão de Atestados e Abonos** | Permitir ao gestor/RH o envio de atestados médicos para abono de faltas ou inconsistências no sistema. |
+| **RF-08** | **Alertas Visuais de Hardware** | Exibir modal/alerta visual na tela em caso de perda de conexão ou falha/falta de papel na impressora. |
+| **RF-09** | **Comprovante Digital (E-mail)** | Em caso de falha ou ausência da impressora, enviar o comprovante em formato digital para o e-mail cadastrado do trabalhador. |
+
+---
+
+## 5. Regras de Negócio (RN)
+
+| ID | Título | Regra |
+| :--- | :--- | :--- |
+| **RN-01** | **Tolerância de Horário** | Tolerância de 5 minutos por marcação, respeitando o limite máximo diário de 10 minutos acumulados. |
+| **RN-02** | **Desconto e Horas Excedentes** | Ultrapassada a tolerância diária de 10 minutos, todo o tempo excedente é contabilizado para desconto em folha. |
+| **RN-03** | **Imutabilidade do Registro** | Cada registro é imutável no banco de dados, auditado com carimbo de tempo (*timestamp* UTC) e foto/credencial. |
+| **RN-04** | **Apuração de Faltas** | Ausência total de marcações ao final do expediente é registrada automaticamente como **Falta Injustificada**. |
+
+---
+
+## 6. Requisitos Não-Funcionais (RNF)
+
+| ID | Título | Regra |
+| :--- | :--- | :--- |
+| **RNF-01** | **Arquitetura PWA Offline-first** | Armazenar registros em `IndexedDB` via `ServiceWorker` durante queda de conexão, realizando *sync* automático ao reconectar. |
+| **RNF-02** | **Desempenho da Interface** | O tempo de captura e resposta local para o clique de marcação de ponto deve ser inferior a 1 segundo. |
+| **RNF-03** | **Compatibilidade** | Suporte total em navegadores baseados em Chromium e Safari (Desktop/Tablet). |
+
+---
+
+## 7. Instruções Obrigatórias para Agentes de IA (Google Jules)
+
+1. **Ausência de Ambiguidade:** NÃO INICIE a codificação se houver qualquer dúvida ou requisito omisso. Solicite esclarecimentos ao usuário antes de implementar.
+2. **Decomposição em Tarefas:** Sempre divida tarefas complexas em subtarefas granulares antes de criar ou modificar arquivos.
+3. **Gerenciamento de Backlog (`backlog.md`):** É OBRIGATÓRIO criar e manter atualizado um arquivo `backlog.md` na raiz do projeto. Toda funcionalidade criada, alterada ou corrigida deve ser registrada nesse arquivo com data, status e escopo da alteração.
