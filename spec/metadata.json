@@ -1,0 +1,6 @@
+{
+  "name": "PontoTech PWA - Controle de Ponto Eletrônico",
+  "description": "Sistema PWA de Controle de Ponto Eletrônico para Tablet e Desktop com reconhecimento biométrico, tolerância automática, emissão de comprovantes e operação offline-first.",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
